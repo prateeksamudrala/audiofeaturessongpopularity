@@ -1,0 +1,334 @@
+---
+title: " Popularity of a Song based on Audio Features"
+author: "Jyothi Samudrala"
+date: "3/06/2021"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+```{r echo=FALSE}
+# Loading Data
+
+setwd('X:/datascience/DSC520 - Statistics for Data Science/Week 11/archive')
+
+data_songs <- read.csv('data.csv')
+
+# Subsetting data to select columns/variables for 2018
+
+data_subset_songs2018 <- subset(data_songs, year == '2018', select=c(acousticness, danceability, duration_ms, energy, instrumentalness,liveness, loudness, speechiness, tempo, valence, mode, popularity))
+
+# Converting mode variable to factor as it is either a major (1) or minor(0) scale song. And also converting popularity to numeric
+
+data_subset_songs2018$mode <- as.factor(data_subset_songs2018$mode)
+data_subset_songs2018$popularity <- as.numeric(data_subset_songs2018$popularity)
+
+# Removing rows with any missing values
+
+finaldata_songs2018 <- na.omit(data_subset_songs2018)
+
+# Considering the frequency distribution of popularity in the datasets, creating two categories of popularity. 0 to 50 = unpopular. 50 to 100 = popular
+
+finaldata_songs2018_categorical <- finaldata_songs2018
+finaldata_songs2018_categorical$popularity <- cut(finaldata_songs2018_categorical$popularity, breaks = c(0,50,Inf), labels = c("unpopular","popular"), include.lowest = TRUE)
+```
+
+
+Problem I addressed: As an independent musician/producer, looking to create popular music, what are some of the audio features that I need to focus on?
+
+I used a linear regression to understand/answer:
+
+1.	How much percentage of variance in a song popularity is accounted by audio features?
+2.	What is the correlation between the various audio features and popularity, and what is the strength of this relationship?
+3.	Also, I validated model accuracy and if the null hypothesis is true or not
+
+I used a Logistic Regression to understand/answer:
+
+1.	How accurately I can predict if a song will be “popular” or not based on audio features?
+2.	Accuracy of the model 
+
+The KNN model was used with similar intent as the logistic regression model.
+
+Kmeans Clustering was used to understand how songs clustered based on audio features.
+
+My methods are appropriate as song popularity is an outcome variable that is certainly dependent on audio features. The question is by how much, and how accurately we can predict it using the various regression and machine learning models.  
+
+
+The insights are as follows:
+
+1. Audio features account for 37% variablilty in a song's popularity
+
+2. All audio features except for tempo have a strong relationship to a song's popularity
+
+3. The relationship is as follows: 
+
+If acousticness increases by one standard deviation (0.30), then popularity increases by 0.07 standard deviations. The standard deviation for popularity is 32.08, so popularity increases by 2.38 units (32.08 × 0.07) for every 0.30 units increase in acousticness.
+
+If danceablity increases by one standard deviation (0.16), then popularity increases by 0.20 standard deviations. The standard deviation for popularity is 32.08, so popularity increases by 6.6 units (32.08 × 0.20) for every 0.16 units increase in danceability
+
+If duration increases by one standard deviation (144886.1), then popularity decreases by 0.083 standard deviations. The standard deviation for popularity is 32.08, so popularity decreases by 2.66 units (32.08 × 0.083) for every 144886.1 milli second increase in duration
+
+If energy increases by one standard deviation (0.227), then popularity decreases by 0.366 standard deviations. The standard deviation for popularity is 32.08, so popularity decreases by 11.74 units (32.08 × 0.366) for every 0.227 units increase in energy
+
+If instrumentalness increases by one standard deviation (0.361), then popularity decreases by 0.264 standard deviations. The standard deviation for popularity is 32.08, so popularity decreases by 8.46 units (32.08 × 0.264) for every 0.361 units increase in instrumentalness
+
+If liveness increases by one standard deviation (0.201), then popularity decreases by 0.105 standard deviations. The standard deviation for popularity is 32.08, so popularity decreases by 3.36 units (32.08 × 0.105) for every 0.201 units increase in liveness
+
+If loudness increases by one standard deviation (4.109), then popularity increases by 0.36 standard deviations. The standard deviation for popularity is 32.08, so popularity increases by 11.54 units (32.08 × 0.36) for every 4.109 units increase in loudness
+
+If speechiness increases by one standard deviation (0.1551), then popularity decreases by 0.057 standard deviations. The standard deviation for popularity is 32.08, so popularity decreases by 1.82 units (32.08 × 0.057) for every 0.1551 units increase in speechiness
+
+If valence increases by one standard deviation (0.244), then popularity decreases by 0.07 standard deviations. The standard deviation for popularity is 32.08, so popularity decreases by 2.24 units (32.08 × 0.07) for every 0.244 units increase in valence
+
+4.	Except for tempo, we can confidently rely on our multilinear regression model to predict a song’s popularity based on audio features.
+
+5.	The linear model is not unduly influenced by outliers, does not break the assumption of independence or no multicollinearity.
+
+6.	Considering model accuracy, I would only use logistic regression (83% accuracy) for predictions. KNN model is 36% accurate. K means clustering is not indicative of much. 
+
+
+In a general sense, to make popular songs, musicians and producers should make relatively short, louder, and danceable songs (up to a limit – please see visual of song popularity vs loudness AND song popularity vs danceability below)
+
+A song’s energy should also be limited up to half (relatively speaking) to not reduce popularity.
+
+Please see narrative below for details
+
+Popular songs are generally loud.
+
+```{r echo=FALSE}
+library(ggplot2)
+ggplot(data = finaldata_songs2018, aes(y = popularity, x = loudness, col=mode)) +
+  geom_point() + xlab("loudness") + ylab("Song popularity") + ggtitle("Song popularity vs. loudness")
+```
+
+Most popular songs are danceable too.
+
+```{r echo=FALSE}
+library(ggplot2)
+ggplot(data = finaldata_songs2018, aes(y = popularity, x = danceability, col=mode)) +
+  geom_point() + xlab("danceability") + ylab("Song popularity") + ggtitle("Song popularity vs. danceability")
+```
+
+Even though multilinear regression indicates a positive relationship between acousticness and song popularity, it seems like songs with less acousticness are more popular.
+
+```{r echo=FALSE}
+library(ggplot2)
+ggplot(data = finaldata_songs2018, aes(y = popularity, x = acousticness, col=mode)) +
+  geom_point() + xlab("acousticness") + ylab("Song popularity") + ggtitle("Song popularity vs. acousticness")
+```
+
+Just because a song is short does not mean it will be popular, but lengthy songs have a low chance to be appealing.
+
+```{r echo=FALSE}
+library(ggplot2)
+ggplot(data = finaldata_songs2018, aes(y = popularity, x = duration_ms, col=mode)) +
+  geom_point() + xlab("duration_ms") + ylab("Song popularity") + ggtitle("Song popularity vs. duration_ms")
+```
+
+The multi linear regression indicates a negative relationship between energy and song popularity. The visual shows that high energy up to a certain extent is good for popularity. Up until 0.60.
+
+```{r echo=FALSE}
+library(ggplot2)
+ggplot(data = finaldata_songs2018, aes(y = popularity, x = energy, col=mode)) +
+  geom_point() + xlab("energy") + ylab("Song popularity") + ggtitle("Song popularity vs. energy")
+```
+Increase in instrumentalness has a negative impact on popularity.
+
+```{r echo=FALSE}
+library(ggplot2)
+ggplot(data = finaldata_songs2018, aes(y = popularity, x = instrumentalness, col=mode)) +
+  geom_point() + xlab("instrumentalness") + ylab("Song popularity") + ggtitle("Song popularity vs. instrumentalness")
+```
+Increase in liveness also has a negative impact on a song’s popularity.
+
+```{r echo=FALSE}
+library(ggplot2)
+ggplot(data = finaldata_songs2018, aes(y = popularity, x = liveness, col=mode)) +
+  geom_point() + xlab("liveness") + ylab("Song popularity") + ggtitle("Song popularity vs. liveness")
+```
+Increase in speechiness has a negative impact on the song's popularity.
+
+```{r echo=FALSE}
+library(ggplot2)
+ggplot(data = finaldata_songs2018, aes(y = liveness, x = speechiness, col=mode)) +
+  geom_point() + xlab("speechiness") + ylab("Song popularity") + ggtitle("Song popularity vs. speechiness")
+```
+
+Valence also has a negative impact on the song's popularity.
+
+```{r echo=FALSE}
+library(ggplot2)
+ggplot(data = finaldata_songs2018, aes(y = valence, x = speechiness, col=mode)) +
+  geom_point() + xlab("valence") + ylab("Song popularity") + ggtitle("Song popularity vs. valence")
+```
+
+
+The limitations of my analysis currently are:
+
+1.	Audio features only account for 37% variability in song popularity. So, we can improve my multilinear regression model by adding other predictors of song popularity like artist’s popularity, marketing budgets etc.
+
+2.	The other limitation of this project is that machine learning techniques (knn and kmeans clustering) do not necessarily indicate much. The KNN model’s accuracy is low (36%). Perhaps, I can improve on the accuracy (or clustering) by tweaking the data slightly through normalization, or by only using certain important predictors.
+
+3.	In addition, researching the dataset metrics (provided by Spotify), as to what they mean, to change them slightly can also improve the accuracy or clustering of my machine learning and/or logistic regression prediction models.
+
+
+# Multi Linear Regression: Using finaldata_songs2018 to understand relationship between song popularity and audio features
+
+```{r}
+# Building a linear regression model
+
+multilinearmod <- lm(popularity ~ acousticness+danceability+duration_ms+energy+instrumentalness+liveness+loudness+speechiness+tempo+valence, data = finaldata_songs2018)
+
+# Understanding the linear model
+
+summary(multilinearmod)
+
+# Calculating confidence intervals
+
+confint(multilinearmod)
+
+# Assessing outliers and influential cases
+
+resid <- resid(multilinearmod)
+rstand <- rstandard(multilinearmod)
+rstud <- rstudent(multilinearmod)
+
+
+cooksdist <- cooks.distance(multilinearmod)
+dfbeta <- dfbeta(multilinearmod)
+dffits <- dffits(multilinearmod)
+leverage <- hatvalues(multilinearmod)
+covariance <- covratio(multilinearmod)
+
+
+outliers_influentialcases_df <- finaldata_songs2018
+outliers_influentialcases_df$resid <- resid
+outliers_influentialcases_df$rstand <- rstand
+outliers_influentialcases_df$rstud <- rstud
+outliers_influentialcases_df$cooksdist <- cooksdist
+outliers_influentialcases_df$dfbeta <- dfbeta
+outliers_influentialcases_df$dffits <- dffits
+outliers_influentialcases_df$leverage <- leverage
+outliers_influentialcases_df$covariance <- covariance
+
+# Storing large residuals in a variable
+
+outliers_influentialcases_df$large.residual <- rstand > 2 | rstand < -2
+
+# sum of large residuals
+
+sum(outliers_influentialcases_df$large.residual)
+
+
+influentials_df <- outliers_influentialcases_df[outliers_influentialcases_df$large.residual, c("cooksdist", "leverage", "covariance")]
+
+# Assessing assumption of independence
+
+library(car)
+durbinWatsonTest(multilinearmod)
+
+# Assessing assumption of no multi-collinearity
+
+vif(multilinearmod)
+tolerance <-1/vif(multilinearmod)
+tolerance
+mean(vif(multilinearmod))
+
+# Visually assessing the model
+
+plot(multilinearmod)
+
+# Calculating standard betas
+
+library(QuantPsyc)
+lm.beta(multilinearmod)
+sd(finaldata_songs2018$acousticness)
+sd(finaldata_songs2018$danceability)
+sd(finaldata_songs2018$duration_ms)
+sd(finaldata_songs2018$energy)
+sd(finaldata_songs2018$instrumentalness)
+sd(finaldata_songs2018$liveness)
+sd(finaldata_songs2018$loudness)
+sd(finaldata_songs2018$speechiness)
+sd(finaldata_songs2018$tempo)
+sd(finaldata_songs2018$valence)
+sd(finaldata_songs2018$popularity)
+
+```
+
+# For creating logistic regression and knn models, to predict if a song can be popular or NOT, I will use: finaldata_songs2018_categorical
+
+```{r}
+# Creating logistic regression model 
+
+logisticmodel <- glm(popularity ~ acousticness+danceability+duration_ms+energy+instrumentalness+liveness+loudness+speechiness+tempo+valence, data = finaldata_songs2018_categorical, family ="binomial" )
+
+summary(logisticmodel)
+
+# Splitting data into training and test sets
+
+library(caTools)
+set.seed(123)
+split <- sample.split(finaldata_songs2018_categorical, SplitRatio = 0.7)
+train <- subset(finaldata_songs2018_categorical, split == "TRUE")
+test <- subset(finaldata_songs2018_categorical, split == "FALSE")
+
+# Training model with training data
+
+mytrainedmodel <- glm(popularity ~ acousticness+danceability+duration_ms+energy+instrumentalness+liveness+loudness+speechiness+tempo+valence, data = train, family ="binomial")
+
+# running test data through model
+
+res <- predict(mytrainedmodel, test, type = "response")
+
+
+# Validating model
+
+confmatrix <- table(Actual_value = test$popularity, Predicted_value = res >0.5)
+confmatrix
+
+# Model Accuracy
+
+(confmatrix[[1,1]] + confmatrix[[2,2]])/sum(confmatrix)
+
+# Creating knn model
+
+# Converting all data to numeric
+
+knn_data <- finaldata_songs2018
+knn_data$mode <- as.numeric(knn_data$mode)
+  
+set.seed(123)
+train_knn_popularity <- subset(knn_data[,c(12)], split == "TRUE")
+test_knn_popularity <- subset(knn_data[,c(12)], split == "FALSE")
+set.seed(123)
+train_knn <- subset(knn_data, split == "TRUE")
+test_knn <- subset(knn_data, split == "FALSE")
+
+# Finding k value
+
+rows <- nrow(train_knn)
+k_value <- sqrt(rows)
+
+# knn
+
+library(caTools)
+library(class)
+knnvalue <- knn(train=train_knn, test=test_knn, cl=train_knn_popularity,k=43)
+confmatrix_knn <- table(knnvalue, test_knn_popularity)
+((confmatrix_knn[[1,1]] + confmatrix_knn[[2,2]])/sum(confmatrix_knn))*100
+
+# k means clustering
+
+k = c(2,3,4,5)
+library(factoextra)
+for(i in k){
+  clusters <- kmeans(knn_data, i, nstart = 5)
+  print(fviz_cluster(clusters, data = knn_data,geom='point',ellipse.type='convex'))
+}
+
+```
+
+
+
