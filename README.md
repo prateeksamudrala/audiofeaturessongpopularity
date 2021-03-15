@@ -10,7 +10,7 @@ As a musician, I find it interesting to explore this Spotify dataset to better u
 
 This is a personal project, and will evolve. The rmd file has been dated accordingly; the file also has details on the analysis. The end goal is to understand the influence of audio features on song appeal, to help independent musicians and producers fine tune their creations for a broader appeal.
 
-Please feel free to reach to collaborate, to improve this model. 
+Please feel free to reach out to collaborate, to improve this model. 
 
 Dataset Dictionary per Spotify: 
 
