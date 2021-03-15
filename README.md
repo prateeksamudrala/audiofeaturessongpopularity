@@ -8,7 +8,9 @@ As a musician, I find it interesting to explore this Spotify dataset to better u
 1. Understand how audio features influence a song’s popularity.
 2. Create a model that can perhaps be provided through streaming platforms to help independent musicians and producers create influential music. Example: When I release a song on Spotify, using this model, maybe Spotify can guide me to make a more appealing song; for instance, Spotify could indicate that my song needs less “valence”.
 
-This is a personal project. The end goal is to understand the influence of audio features on song appeal, to help independent musicians and producers fine tune their creations for a broader appeal.
+This is a personal project, and will evolve. The rmd file has been dated accordingly; the file also has details on the analysis. The end goal is to understand the influence of audio features on song appeal, to help independent musicians and producers fine tune their creations for a broader appeal.
+
+Please feel free to reach to collaborate, to improve this model. 
 
 Dataset Dictionary per Spotify: 
 
